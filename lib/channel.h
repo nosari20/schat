@@ -3,25 +3,27 @@
 
 #include <string>
 #include <functional>
+#include <vector>
 
 #include "host.h"
-#include "message.h"
+#include "pdu.h"
 
 class Channel
 {
 public:
-    Channel(Host dest, int port);
+    Channel(int portIn);
     ~Channel();
-    void write(Message data);
-    void onRcv(std::function<void(Message)> callback);
-    void open(int bufferSize = 128);
+    int join(Host peer);
+    void write(PDU data);
+    void onRcv(std::function<void(Host, PDU)> callback);
+    int open(int bufferSize = 128);
     void close();
 
 private:
-    Host destination;
-    int port;
+    std::vector<Host> peers;
+    int portIn;
     bool opened;
-    std::function<void(Message)> callback;
+    std::function<void(Host, PDU)> callback;
 
     
 };

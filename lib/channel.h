@@ -4,6 +4,8 @@
 #include <string>
 #include <functional>
 #include <vector>
+#include <map>
+#include <thread>
 
 #include "host.h"
 #include "pdu.h"
@@ -20,10 +22,13 @@ public:
     void close();
 
 private:
-    std::vector<Host> peers;
+    std::map<Host, int> peers;
     int portIn;
     bool opened;
     std::function<void(Host, PDU)> callback;
+    std::thread server;
+
+
 
     
 };

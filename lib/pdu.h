@@ -4,13 +4,12 @@
 #include <string>
 
 #include "host.h"
-#include "array"
+#include <vector>
 
 class PDU {
 
     public :
-        static const int RAW_PDU_SIZE = 128;
-        typedef  std::array<char,RAW_PDU_SIZE> RAW_PDU;
+        typedef  std::vector<char> RAW_PDU;
         PDU(){}
         PDU(RAW_PDU raw){
             rawPDU = raw;

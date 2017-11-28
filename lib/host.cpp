@@ -26,15 +26,20 @@ Host::Host(std::string h, int p)
 
     ip = std::string(inet_ntoa(*addr_list[0]));
 }
-std::string Host::getIp()
+std::string Host::getIp() const
 {
     return ip;
 }
 
-int Host::getPort(){
+int Host::getPort() const
+{
     return port;
 }
 
-std::string Host::getHost(){
+std::string Host::getHost() const
+{
     return host;
 }
+
+
+

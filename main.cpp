@@ -17,7 +17,7 @@ using namespace std;
 void doc(){
     cout << "Usage : schat [OPTIONS]" << endl << endl;
     cout << "Options : " << endl;
-    cout << '\t' << "--port-in=PORT_IN," << '\t' << "port in (default 66666)" << endl;
+    cout << '\t' << "--port=PORT," << '\t' << "port (default 66666)" << endl;
 
 }
 
@@ -32,19 +32,16 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    int portIn = 66666;
-    if(app.hasOption("port-in")){
-        if(app.option("port-in").compare("") != 0 ){
-            portIn = atoi(app.option("port-in").c_str());
+    int port = 66666;
+    if(app.hasOption("port")){
+        if(app.option("port").compare("") != 0 ){
+            port = atoi(app.option("port").c_str());
         }
     }
 
-    cout << "\x1b[31;4mListening on port " << portIn << "\x1b[0m" << endl;
+    cout << "\x1b[31;4mListening on port " << port << "\x1b[0m" << endl;
 
-    Channel chan(portIn);
-    PDU::RAW_PDU rpdu = {"hello world!"};
-    PDU pdu(rpdu);
-    chan.write(pdu);
+    Channel chan(port);
 
     chan.onRcv(
         [=](Host peer, PDU pdu) -> void
@@ -61,16 +58,21 @@ int main(int argc, char *argv[])
 
     std::string in;
     bool end = false;
-
+    int error;
     do{
        getline (cin, in);
-       if(in.compare(std::string("")) == 0){continue;}
+       cout << in << endl;
+       //if(in.compare(std::string("")) == 0){continue;}
+
+
        if(in[0] == '/'){
            if(in.compare(std::string("/exit")) == 0){end =true; continue;}
 
-            std::string prefix("/join");
+            std::string prefix("/join ");
             std::string command = std::string(in);
+            cout << command << endl;
             if (!command.compare(0, prefix.size(), prefix)){
+                cout << "join" << endl;
                 std::string argsString = command.substr(prefix.size());
                 std::string cargs[2];
                 int i = 0;
@@ -79,8 +81,9 @@ int main(int argc, char *argv[])
                     ssin >> cargs[i];
                     ++i;
                 }
-                if(chan.join(Host(cargs[0],atoi(cargs[1].c_str()))) < 0){
-                    cerr << "\x1b[31;1mCannot join host " << cargs[0] << " on port " << cargs[1] << "\x1b[0m" << endl;
+                cout << cargs[i] << endl;
+                if((error=chan.join(Host(cargs[0],atoi(cargs[1].c_str())))) < 0){
+                    cerr << "\x1b[31;1mCannot join host " << cargs[0] << " on port " << cargs[1] << " (" << error << ")\x1b[0m" << endl;
                 }else{
                     cout << "\x1b[36;1mHost " << cargs[0] << " on port " << cargs[1] << "connected\x1b[0m" << endl;
                 }
@@ -89,7 +92,7 @@ int main(int argc, char *argv[])
 
 
        }else{
-           rpdu = {};
+           PDU::RAW_PDU rpdu;
            std::copy(std::begin(in), std::end(in), std::begin(rpdu));
            PDU pdu(rpdu);
            chan.write(pdu);
@@ -97,6 +100,8 @@ int main(int argc, char *argv[])
     }while(!end);
 
     chan.close();
+
+    std::cerr << "error " << std::endl;
 
     return 0;
 }
